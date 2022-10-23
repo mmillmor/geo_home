@@ -1,0 +1,16 @@
+{
+  "domain": "geo_home",
+  "name": "Geo Home",
+  "version":"1.0.1",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/geo_home",
+  "requirements": [],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@mmillmor"
+  ],
+  "iot_class": "cloud_polling"
+}
