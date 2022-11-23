@@ -13,7 +13,8 @@ them to enable your meter.
 Once you have a WiFi connected smart meter, create an account on the Geo Home app. The username and password for this account are used to
 connect the Geo Home integration.
 
-When you install the Geo Home integration, you will be prompted for
+After downloading the Geo Home integration into HACS, remember to install it by navigating to Settings -> Devices & services -> Add integration, then
+select "Geo Home". You will be prompted for
 a username and password. Enter the ones you created from the app. This will create Gas and Electricity sensors, tracking the lifetime
 energy usage of your meters.
 
