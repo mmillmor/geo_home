@@ -20,6 +20,7 @@ from .const import (
     LOGIN_URL,
     PERIODIC_DATA_URL,
     LIVE_DATA_URL,
+    DAILY_DATA_URL,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,9 +41,28 @@ class GeoHomeHub:
         self.gasReadingTime = None
         self.deviceId = None
         self.gasPrice = None
+        self.gasStandingCharge = None
         self.electricityPrice = None
+        self.electricityStandingCharge = None
         self.gasPower = None
         self.electricityPower = None
+        self.gasCostToday = None
+        self.gasCostThisWeek = None
+        self.gasCostThisMonth = None
+        self.gasCostThisBill = None
+        self.gasCostThisBillTimestamp=None
+        self.gaskWhToday = None
+        self.gaskWhThisWeek = None
+        self.gaskWhThisMonth = None
+        self.electricityCostToday = None
+        self.electricityCostThisWeek = None
+        self.electricityCostThisMonth = None
+        self.electricityCostThisBill = None
+        self.electricityCostThisBillTimestamp=None
+        self.electricitykWhToday = None
+        self.electricitykWhThisWeek = None
+        self.electricitykWhThisMonth = None
+
 
     def async_auth(self) -> bool:
         """Validate the username and password."""
@@ -96,13 +116,15 @@ class GeoHomeHub:
             response_json = response.json()
             powerArray = response_json.get("power")
 
-            for powerItem in powerArray:
-                if powerItem["type"] == "ELECTRICITY":
-                    if powerItem["valueAvailable"]:
-                        self.electricityPower = powerItem["watts"]
-                if powerItem["type"] == "GAS_ENERGY":
-                    if powerItem["valueAvailable"]:
-                        self.gasPower = powerItem["watts"]
+            if powerArray is not None:
+
+              for powerItem in powerArray:
+                  if powerItem["type"] == "ELECTRICITY":
+                      if powerItem["valueAvailable"]:
+                          self.electricityPower = powerItem["watts"]
+                  if powerItem["type"] == "GAS_ENERGY":
+                      if powerItem["valueAvailable"]:
+                          self.gasPower = powerItem["watts"]
 
             response = requests.get(
                 BASE_URL + PERIODIC_DATA_URL + str(self.deviceId),
@@ -112,31 +134,97 @@ class GeoHomeHub:
                 response_json = response.json()
                 consumptionArray = response_json.get("totalConsumptionList")
 
-                for consumptionItem in consumptionArray:
-                    if consumptionItem["commodityType"] == "ELECTRICITY":
-                        if consumptionItem["valueAvailable"]:
-                            self.electricityReading = round(
-                                consumptionItem["totalConsumption"], 2
-                            )
-                            self.electricityReadingTime = consumptionItem["readingTime"]
-                    if consumptionItem["commodityType"] == "GAS_ENERGY":
-                        if consumptionItem["valueAvailable"]:
-                            self.gasReading = round(
-                                consumptionItem["totalConsumption"] * 11.3627 / 1000, 2
-                            )
-                            self.gasReadingTime = consumptionItem["readingTime"]
+                if consumptionArray is not None:
+
+                  for consumptionItem in consumptionArray:
+                      if consumptionItem["commodityType"] == "ELECTRICITY":
+                          if consumptionItem["valueAvailable"]:
+                              self.electricityReading = round(
+                                  consumptionItem["totalConsumption"], 2
+                              )
+                              self.electricityReadingTime = consumptionItem["readingTime"]
+                      if consumptionItem["commodityType"] == "GAS_ENERGY":
+                          if consumptionItem["valueAvailable"]:
+                              self.gasReading = round(
+                                  consumptionItem["totalConsumption"] * 11.3627 / 1000, 2
+                              )
+                              self.gasReadingTime = consumptionItem["readingTime"]
 
                 tarrifArray = response_json.get("activeTariffList")
 
-                for tarrifItem in tarrifArray:
-                    if tarrifItem["commodityType"] == "ELECTRICITY":
-                        if tarrifItem["valueAvailable"]:
-                            self.electricityPrice = (
-                                tarrifItem["activeTariffPrice"] / 100
-                            )
-                    if tarrifItem["commodityType"] == "GAS_ENERGY":
-                        if tarrifItem["valueAvailable"]:
-                            self.gasPrice = tarrifItem["activeTariffPrice"] / 100
+                if tarrifArray is not None:
+
+                  for tarrifItem in tarrifArray:
+                      if tarrifItem["commodityType"] == "ELECTRICITY":
+                          if tarrifItem["valueAvailable"]:
+                              self.electricityPrice = tarrifItem["activeTariffPrice"] / 100
+                      if tarrifItem["commodityType"] == "GAS_ENERGY":
+                          if tarrifItem["valueAvailable"]:
+                              self.gasPrice = tarrifItem["activeTariffPrice"] / 100
+                            
+                billToDateArray = response_json.get("billToDateList")
+
+                if billToDateArray is not None:
+                  for billToDateItem in billToDateArray:
+                      if billToDateItem["commodityType"] == "ELECTRICITY":
+                          if billToDateItem["valueAvailable"]:
+                              self.electricityCostThisBill = round(billToDateItem["billToDate"]/100,2)
+                              self.electricityCostThisBillTimestamp=billToDateItem["startUTC"]
+                      if billToDateItem["commodityType"] == "GAS_ENERGY":
+                          if billToDateItem["valueAvailable"]:
+                              self.gasCostThisBill = round(billToDateItem["billToDate"]/100,2)
+                              self.gasCostThisBillTimestamp=billToDateItem["startUTC"]
+
+
+                currentCostsElecArray = response_json.get("currentCostsElec")
+
+                if currentCostsElecArray is not None:
+
+                  for currentCostsElecItem in currentCostsElecArray:
+                      if currentCostsElecItem["duration"] == "DAY":
+                          self.electricitykWhToday = currentCostsElecItem["energyAmount"]
+                          self.electricityCostToday = round(currentCostsElecItem["costAmount"]/100,2)
+                      if currentCostsElecItem["duration"] == "WEEK":
+                          self.electricitykWhThisWeek = currentCostsElecItem["energyAmount"]
+                          self.electricityCostThisWeek = round(currentCostsElecItem["costAmount"]/100,2)
+                      if currentCostsElecItem["duration"] == "MONTH":
+                          self.electricitykWhThisMonth = currentCostsElecItem["energyAmount"]
+                          self.electricityCostThisMonth = round(currentCostsElecItem["costAmount"]/100,2)
+
+                currentCostsGasArray = response_json.get("currentCostsGas")
+
+                if currentCostsGasArray is not None:
+
+                  for currentCostsGasItem in currentCostsGasArray:
+                      if currentCostsGasItem["duration"] == "DAY":
+                          self.gaskWhToday = currentCostsGasItem["energyAmount"]
+                          self.gasCostToday = round(currentCostsGasItem["costAmount"]/100,2)
+                      if currentCostsGasItem["duration"] == "WEEK":
+                          self.gaskWhThisWeek = currentCostsGasItem["energyAmount"]
+                          self.gasCostThisWeek = round(currentCostsGasItem["costAmount"]/100,2)
+                      if currentCostsGasItem["duration"] == "MONTH":
+                          self.gaskWhThisMonth = currentCostsGasItem["energyAmount"]
+                          self.gasCostThisMonth = round(currentCostsGasItem["costAmount"]/100,2)
+
+
+                response = requests.get(
+                    BASE_URL + DAILY_DATA_URL + str(self.deviceId),
+                    headers={"Authorization": "Bearer " + str(self.accessToken)},
+                )
+                if response.status_code == 200:
+                    response_json = response.json()
+                    standingChargeArray = response_json.get("standingChargeList")
+        
+                    if standingChargeArray is not None:
+                      for standingChargeItem in standingChargeArray:
+                          if standingChargeItem["commodityType"] == "ELECTRICITY":
+                              if standingChargeItem["valueAvailable"]:
+                                  self.electricityStandingCharge = standingChargeItem["standingCharge"]/100
+                          if standingChargeItem["commodityType"] == "GAS_ENERGY":
+                              if standingChargeItem["valueAvailable"]:
+                                  self.gasStandingCharge = standingChargeItem["standingCharge"]/100
+
+                    
                 return True
             else:
                 self.accessToken = None
