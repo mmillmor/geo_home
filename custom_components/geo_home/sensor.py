@@ -691,7 +691,7 @@ class GeoHomeGaskWhTodaySensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:fire"
 
     @property
     def last_reset(self):
@@ -724,7 +724,7 @@ class GeoHomeGaskWhThisWeekSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:fire"
 
     @property
     def last_reset(self):
@@ -759,7 +759,7 @@ class GeoHomeGaskWhThisMonthSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:fire"
 
     @property
     def last_reset(self):
@@ -791,7 +791,7 @@ class GeoHomeElectricitykWhTodaySensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:flash"
 
     @property
     def last_reset(self):
@@ -824,7 +824,7 @@ class GeoHomeElectricitykWhThisWeekSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:flash"
 
     @property
     def last_reset(self):
@@ -859,7 +859,7 @@ class GeoHomeElectricitykWhThisMonthSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:currency-gbp"
+        return "mdi:flash"
 
     @property
     def last_reset(self):
