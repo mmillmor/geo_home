@@ -2,6 +2,7 @@ from __future__ import annotations
 from .geohome import GeoHomeHub
 import logging
 import async_timeout
+from datetime import datetime, time, date
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -51,11 +52,28 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             GeoHomeGasSensor(coordinator, hub),
             GeoHomeElectricitySensor(coordinator, hub),
             GeoHomeGasPriceSensor(coordinator, hub),
+            GeoHomeGasStandingChargeSensor(coordinator, hub),
             GeoHomeElectricityPriceSensor(coordinator, hub),
+            GeoHomeElectricityStandingChargeSensor(coordinator, hub),
             GeoHomeGasPowerSensor(coordinator, hub),
             GeoHomeElectricityPowerSensor(coordinator, hub),
             GeoHomeGasCostPerHourSensor(coordinator, hub),
             GeoHomeElectricityCostPerHourSensor(coordinator, hub),
+            GeoHomeGasCostTodaySensor(coordinator, hub),
+            GeoHomeGasCostThisWeekSensor(coordinator, hub),
+            GeoHomeGasCostThisMonthSensor(coordinator, hub),
+            GeoHomeGasCostThisBillSensor(coordinator, hub),
+            GeoHomeElectricityCostTodaySensor(coordinator, hub),
+            GeoHomeElectricityCostThisWeekSensor(coordinator, hub),
+            GeoHomeElectricityCostThisMonthSensor(coordinator, hub),
+            GeoHomeElectricityCostThisBillSensor(coordinator, hub),
+            GeoHomeGaskWhTodaySensor(coordinator, hub),
+            GeoHomeGaskWhThisWeekSensor(coordinator, hub),
+            GeoHomeGaskWhThisMonthSensor(coordinator, hub),
+            GeoHomeElectricitykWhTodaySensor(coordinator, hub),
+            GeoHomeElectricitykWhThisWeekSensor(coordinator, hub),
+            GeoHomeElectricitykWhThisMonthSensor(coordinator, hub),
+
         ]
     )
 
@@ -64,7 +82,7 @@ class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
-        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
 
@@ -99,12 +117,12 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "£/kWh"
+        self._attr_native_unit_of_measurement = "GBP"
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return "Gas Price"
+        return "Gas Price per kWh"
 
     @property
     def unique_id(self):
@@ -121,13 +139,40 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         """Icon to use in the frontend, if any."""
         return "mdi:currency-gbp"
 
+class GeoHomeGasStandingChargeSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Standing Charge per Day"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_standing_charge"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasStandingCharge
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
 
 class GeoHomeElectricitySensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
-        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
 
     @property
@@ -161,12 +206,12 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "£/kWh"
+        self._attr_native_unit_of_measurement = "GBP"
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return "Electricity Price"
+        return "Electricity Price per kWh"
 
     @property
     def unique_id(self):
@@ -177,6 +222,34 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
     def native_value(self):
         """Return the state of the sensor."""
         return self.hub.electricityPrice
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+class GeoHomeElectricityStandingChargeSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.MEASUREMENT
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Standing Charge per Day"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_standing_charge"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityStandingCharge
 
     @property
     def icon(self):
@@ -254,7 +327,7 @@ class GeoHomeGasCostPerHourSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "£/hour"
+        self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
     @property
@@ -278,7 +351,7 @@ class GeoHomeGasCostPerHourSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:fire"
+        return "mdi:currency-gbp"
 
     @property
     def last_reset(self):
@@ -289,7 +362,7 @@ class GeoHomeElectricityCostPerHourSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "£/hour"
+        self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
     @property
@@ -313,8 +386,481 @@ class GeoHomeElectricityCostPerHourSensor(CoordinatorEntity, SensorEntity):
     @property
     def icon(self):
         """Icon to use in the frontend, if any."""
-        return "mdi:flash"
+        return "mdi:currency-gbp"
 
     @property
     def last_reset(self):
         return None
+
+
+class GeoHomeGasCostTodaySensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Cost Today"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_cost_today"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasCostToday
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(date.today(), datetime.min.time())
+
+
+class GeoHomeGasCostThisWeekSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Cost This Week"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_cost_this_week"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasCostThisWeek
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        today = date.today()
+        start = today - timedelta(days=today.weekday())
+
+        return datetime.combine(start, datetime.min.time())
+
+class GeoHomeGasCostThisMonthSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Cost This Month"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_cost_this_month"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasCostThisMonth
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(datetime.today().replace(day=1), datetime.min.time())
+
+class GeoHomeGasCostThisBillSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Cost This Bill"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_cost_this_bill"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasCostThisBill
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        if self.hub.gasCostThisBillTimestamp is None:
+          return None
+        else:
+          return datetime.fromtimestamp(self.hub.gasCostThisBillTimestamp)
+
+
+class GeoHomeElectricityCostTodaySensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Cost Today"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_cost_today"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityCostToday
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(date.today(), datetime.min.time())
+
+
+class GeoHomeElectricityCostThisWeekSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Cost This Week"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_cost_this_week"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityCostThisWeek
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        today = date.today()
+        start = today - timedelta(days=today.weekday())
+
+        return datetime.combine(start, datetime.min.time())
+
+class GeoHomeElectricityCostThisMonthSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Cost This Month"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_cost_this_month"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityCostThisMonth
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(datetime.today().replace(day=1), datetime.min.time())
+
+class GeoHomeElectricityCostThisBillSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = "GBP"
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Cost This Bill"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_cost_this_bill"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityCostThisBill
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        if self.hub.electricityCostThisBillTimestamp is None:
+          return None
+        else:
+          return datetime.fromtimestamp(self.hub.electricityCostThisBillTimestamp)
+
+
+class GeoHomeGaskWhTodaySensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas kWh Today"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_kwh_today"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gaskWhToday
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(date.today(), datetime.min.time())
+
+
+class GeoHomeGaskWhThisWeekSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas kWh This Week"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_kwh_this_week"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gaskWhThisWeek
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        today = date.today()
+        start = today - timedelta(days=today.weekday())
+
+        return datetime.combine(start, datetime.min.time())
+
+class GeoHomeGaskWhThisMonthSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas kWh This Month"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_kwh_this_month"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gaskWhThisMonth
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(datetime.today().replace(day=1), datetime.min.time())
+
+class GeoHomeElectricitykWhTodaySensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity kWh Today"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_kwh_today"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricitykWhToday
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(date.today(), datetime.min.time())
+
+
+class GeoHomeElectricitykWhThisWeekSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity kWh This Week"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_kwh_this_week"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricitykWhThisWeek
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        today = date.today()
+        start = today - timedelta(days=today.weekday())
+
+        return datetime.combine(start, datetime.min.time())
+
+class GeoHomeElectricitykWhThisMonthSensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.ENERGY
+        self._attr_state_class = SensorStateClass.TOTAL
+        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity kWh This Month"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_kwh_this_month"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricitykWhThisMonth
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return datetime.combine(datetime.today().replace(day=1), datetime.min.time())
