@@ -13,7 +13,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorDeviceClass
 )
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT, STATE_OFF, STATE_ON
+from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT, STATE_OFF, STATE_ON, VOLUME_CUBIC_METERS
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.update_coordinator import (
@@ -54,6 +54,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     async_add_entities(
         [
             GeoHomeGasSensor(coordinator, hub),
+            GeoHomeGasM3Sensor(coordinator, hub),
             GeoHomeElectricitySensor(coordinator, hub),
             GeoHomeGasPriceSensor(coordinator, hub),
             GeoHomeGasStandingChargeSensor(coordinator, hub),
@@ -106,7 +107,7 @@ class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     @property
     def native_value(self):
         """Return the state of the sensor."""
-        return self.hub.gasReading
+        return self.hub.gaskWhReading
 
     @property
     def icon(self):
@@ -117,6 +118,37 @@ class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     def last_reset(self):
         return None
 
+class GeoHomeGasM3Sensor(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.GAS
+        self._attr_state_class = SensorStateClass.TOTAL_INCREASING
+        self._attr_native_unit_of_measurement = VOLUME_CUBIC_METERS
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas m³"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_m3_total"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasReading
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:fire"
+
+    @property
+    def last_reset(self):
+        return None
 
 class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
