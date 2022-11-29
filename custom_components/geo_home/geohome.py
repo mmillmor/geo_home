@@ -37,6 +37,7 @@ class GeoHomeHub:
         self.accessToken = None
         self.electricityReading = None
         self.gasReading = None
+        self.gaskWhReading = None
         self.electricityReadingTime = None
         self.gasReadingTime = None
         self.deviceId = None
@@ -157,9 +158,8 @@ class GeoHomeHub:
                               self.electricityReadingTime = consumptionItem["readingTime"]
                       if consumptionItem["commodityType"] == "GAS_ENERGY":
                           if consumptionItem["valueAvailable"]:
-                              self.gasReading = round(
-                                  consumptionItem["totalConsumption"] * 11.3627 / 1000, 2
-                              )
+                              self.gasReading = consumptionItem["totalConsumption"]/1000
+                              self.gaskWhReading = round(consumptionItem["totalConsumption"] * 11.3627 / 1000, 2)
                               self.gasReadingTime = consumptionItem["readingTime"]
 
                 tarrifArray = response_json.get("activeTariffList")
