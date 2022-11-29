@@ -124,7 +124,7 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @property
     def name(self):
@@ -213,7 +213,7 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @property
     def name(self):
