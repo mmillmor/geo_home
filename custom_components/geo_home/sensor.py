@@ -7,9 +7,13 @@ from datetime import datetime, time, date
 from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
-    SensorDeviceClass,
+    SensorDeviceClass
 )
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT
+from homeassistant.components.binary_sensor import (
+    BinarySensorEntity,
+    BinarySensorDeviceClass
+)
+from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT, STATE_OFF, STATE_ON
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.update_coordinator import (
@@ -73,6 +77,9 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             GeoHomeElectricitykWhTodaySensor(coordinator, hub),
             GeoHomeElectricitykWhThisWeekSensor(coordinator, hub),
             GeoHomeElectricitykWhThisMonthSensor(coordinator, hub),
+            GeoHomeGasZigbeeConnected(coordinator, hub),
+            GeoHomeElectricityZigbeeConnected(coordinator, hub),
+            GeoHomeHanConnected(coordinator, hub),
 
         ]
     )
@@ -864,3 +871,111 @@ class GeoHomeElectricitykWhThisMonthSensor(CoordinatorEntity, SensorEntity):
     @property
     def last_reset(self):
         return datetime.combine(datetime.today().replace(day=1), datetime.min.time())
+
+class GeoHomeGasZigbeeConnected(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Meter Zigbee Connection"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "gas_zigbee_connection"
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        if self.hub.gasZigbeeStatus is not None:
+            if self.hub.gasZigbeeStatus=="CONNECTED":
+                return STATE_ON
+            else:
+                return STATE_OFF
+        return None
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        if self.hub.gasZigbeeStatus is not None:
+            if self.hub.gasZigbeeStatus=="CONNECTED":
+                return "mdi:lan-connect"
+            else :
+                return "mdi:lan-disconnect"
+        return "mdi:lan-pending"
+
+class GeoHomeElectricityZigbeeConnected(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Meter Zigbee Connection"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "electricity_zigbee_connection"
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        if self.hub.electricityZigbeeStatus is not None:
+            if self.hub.electricityZigbeeStatus=="CONNECTED":
+                return STATE_ON
+            else:
+                return STATE_OFF
+        return None
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        if self.hub.electricityZigbeeStatus is not None:
+            if self.hub.electricityZigbeeStatus=="CONNECTED":
+                return "mdi:lan-connect"
+            else :
+                return "mdi:lan-disconnect"
+        return "mdi:lan-pending"
+
+class GeoHomeHanConnected(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+        super().__init__(coordinator)
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Geo Home HAN Connection"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_han_connection"
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        if self.hub.hanStatus is not None:
+            if self.hub.hanStatus=="CONNECTED":
+                return STATE_ON
+            else:
+                return STATE_OFF
+        return None
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        if self.hub.hanStatus is not None:
+            if self.hub.hanStatus=="CONNECTED":
+                return "mdi:lan-connect"
+            else :
+                return "mdi:lan-disconnect"
+        return "mdi:lan-pending"
