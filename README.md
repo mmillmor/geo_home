@@ -18,6 +18,12 @@ select "Geo Home". You will be prompted for
 a username and password. Enter the ones you created from the app. This will create Gas and Electricity sensors, tracking the lifetime
 energy usage of your meters.
 
+## Energy Dashboard Configuration
+
+To display Electricity in the energy dashboard, add sensor.electricity as your _Electricity Consumed Energy (kWh)_, and set _Use an entity tracking the total costs_ with a cost sensor of sensor.electricity_cost_today
+
+To display Gas in the energy dashboard, add sensor.gas or sensor.gas_m3 as your _Gas usage_, and set _Use an entity tracking the total costs_ with a cost sensor of sensor.gas_cost_today
+
 
 ## Upgrading
 
