@@ -62,6 +62,9 @@ class GeoHomeHub:
         self.electricitykWhToday = None
         self.electricitykWhThisWeek = None
         self.electricitykWhThisMonth = None
+        self.gasZigbeeStatus = None
+        self.electricityZigbeeStatus = None
+        self.hanStatus = None
 
 
     def async_auth(self) -> bool:
@@ -125,6 +128,15 @@ class GeoHomeHub:
                   if powerItem["type"] == "GAS_ENERGY":
                       if powerItem["valueAvailable"]:
                           self.gasPower = powerItem["watts"]
+
+            zigbeeStatus = response_json.get("zigbeeStatus")
+            
+            if zigbeeStatus is not None:
+
+              self.gasZigbeeStatus = zigbeeStatus["gasClusterStatus"]
+              self.electricityZigbeeStatus = zigbeeStatus["electricityClusterStatus"]
+              self.hanStatus = zigbeeStatus["hanStatus"]
+
 
             response = requests.get(
                 BASE_URL + PERIODIC_DATA_URL + str(self.deviceId),
