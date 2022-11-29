@@ -18,3 +18,7 @@ select "Geo Home". You will be prompted for
 a username and password. Enter the ones you created from the app. This will create Gas and Electricity sensors, tracking the lifetime
 energy usage of your meters.
 
+
+## Upgrading
+
+If you are upgrading from version 1.2, the units of your cost sensors will have been £/kWh instead of GBP/kWh. You can go to https://my.home-assistant.io/redirect/developer_statistics to correct that
