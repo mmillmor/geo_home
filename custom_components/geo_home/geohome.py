@@ -99,8 +99,11 @@ class GeoHomeHub:
         )
         if response.status_code == 200:
             response_json = response.json()
-            system_roles = response_json.get("systemRoles")
-            self.deviceId = system_roles[0]["systemId"]
+            systemDetails = response_json.get("systemDetails")
+            for system in systemDetails:
+                if len(system["devices"])>0:
+                    self.deviceId = system["systemId"]
+                    break
         else:
             _LOGGER.warning("GeoHome Device Details API returned " + str(response.status_code))
 
