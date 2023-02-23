@@ -155,7 +155,6 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @property
@@ -183,8 +182,7 @@ class GeoHomeGasStandingChargeSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/day"
 
     @property
     def name(self):
@@ -244,7 +242,6 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @property
@@ -272,8 +269,7 @@ class GeoHomeElectricityStandingChargeSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/day"
 
     @property
     def name(self):
