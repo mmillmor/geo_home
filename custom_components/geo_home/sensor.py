@@ -2,7 +2,7 @@ from __future__ import annotations
 from .geohome import GeoHomeHub
 import logging
 import async_timeout
-from datetime import datetime, time, date
+from datetime import datetime, time, date, timedelta
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -14,6 +14,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass
 )
 from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT, STATE_OFF, STATE_ON, VOLUME_CUBIC_METERS
+from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.update_coordinator import (
@@ -21,13 +22,10 @@ from homeassistant.helpers.update_coordinator import (
     DataUpdateCoordinator,
     UpdateFailed,
 )
-from datetime import timedelta
-
 
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
-
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
 
@@ -35,19 +33,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     password = config_entry.data.get("password")
     hub = GeoHomeHub(username, password, hass)
 
-    async def async_update_data():
-        async with async_timeout.timeout(30):
-            return await hub.get_device_data()
-
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        # Name of the data. For logging purposes.
-        name="sensor",
-        update_method=async_update_data,
-        # Polling interval. Will only be polled if there are subscribers.
-        update_interval=timedelta(seconds=120),
-    )
+    coordinator = MyCoordinator(hass, hub)
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -85,6 +71,24 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
         ]
     )
 
+class MyCoordinator(DataUpdateCoordinator):
+
+    def __init__(self, hass, hub):
+        """Initialize my coordinator."""
+        super().__init__(
+            hass,
+            _LOGGER,
+            # Name of the data. For logging purposes.
+            name="geo home sensor",
+            # Polling interval. Will only be polled if there are subscribers.
+            update_interval=timedelta(seconds=120),
+        )
+        self.hub = hub
+
+    async def _async_update_data(self):
+        async with async_timeout.timeout(30):
+            return await self.hub.get_device_data()
+
 
 class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
@@ -93,6 +97,11 @@ class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -126,6 +135,11 @@ class GeoHomeGasM3Sensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = VOLUME_CUBIC_METERS
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -157,6 +171,11 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -183,6 +202,11 @@ class GeoHomeGasStandingChargeSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_native_unit_of_measurement = "GBP/day"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -211,6 +235,11 @@ class GeoHomeElectricitySensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -244,6 +273,11 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -270,6 +304,11 @@ class GeoHomeElectricityStandingChargeSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
         self._attr_native_unit_of_measurement = "GBP/day"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -299,6 +338,11 @@ class GeoHomeGasPowerSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.MEASUREMENT
         self._attr_native_unit_of_measurement = POWER_WATT
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -333,6 +377,11 @@ class GeoHomeElectricityPowerSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = POWER_WATT
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -361,9 +410,13 @@ class GeoHomeGasCostPerHourSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/hour"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -396,9 +449,13 @@ class GeoHomeElectricityCostPerHourSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
-        self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = "GBP"
+        self._attr_native_unit_of_measurement = "GBP/hour"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -436,6 +493,11 @@ class GeoHomeGasCostTodaySensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -468,6 +530,11 @@ class GeoHomeGasCostThisWeekSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -504,6 +571,11 @@ class GeoHomeGasCostThisMonthSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -535,6 +607,11 @@ class GeoHomeGasCostThisBillSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -572,6 +649,11 @@ class GeoHomeElectricityCostTodaySensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -604,6 +686,11 @@ class GeoHomeElectricityCostThisWeekSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -640,6 +727,11 @@ class GeoHomeElectricityCostThisMonthSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -671,6 +763,11 @@ class GeoHomeElectricityCostThisBillSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -708,6 +805,11 @@ class GeoHomeGaskWhTodaySensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -740,6 +842,11 @@ class GeoHomeGaskWhThisWeekSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -776,6 +883,11 @@ class GeoHomeGaskWhThisMonthSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -807,6 +919,11 @@ class GeoHomeElectricitykWhTodaySensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -840,6 +957,11 @@ class GeoHomeElectricitykWhThisWeekSensor(CoordinatorEntity, SensorEntity):
         self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -876,6 +998,11 @@ class GeoHomeElectricitykWhThisMonthSensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -905,6 +1032,11 @@ class GeoHomeGasZigbeeConnected(CoordinatorEntity, BinarySensorEntity):
         self.hub = hub
         self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
@@ -942,6 +1074,11 @@ class GeoHomeElectricityZigbeeConnected(CoordinatorEntity, BinarySensorEntity):
         self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
         super().__init__(coordinator)
 
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
     @property
     def name(self):
         """Return the name of the sensor."""
@@ -977,6 +1114,11 @@ class GeoHomeHanConnected(CoordinatorEntity, BinarySensorEntity):
         self.hub = hub
         self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
         super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
 
     @property
     def name(self):
