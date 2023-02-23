@@ -249,5 +249,5 @@ class GeoHomeHub:
 
     async def get_device_data(self):
 
-        response = self.hass.async_add_executor_job(self.async_get_device_data)
+        response = await self.hass.async_add_executor_job(self.async_get_device_data)
         return response
