@@ -38,8 +38,13 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(
-        [
-            GeoHomeGasSensor(coordinator, hub),
+        [   GeoHomeElectricityCreditRemaining(coordinator, hub),
+            GeoHomeGasCreditRemaining(coordinator, hub),
+		    GeoHomeElectricityEmergencyCreditBalance(coordinator, hub),
+            GeoHomeGasEmergencyCreditBalance(coordinator, hub),
+            GeoHomeElectricitySupplyStatus(coordinator, hub),
+		    GeoHomeGasSupplyStatus(coordinator, hub),
+		    GeoHomeGasSensor(coordinator, hub),
             GeoHomeGasM3Sensor(coordinator, hub),
             GeoHomeElectricitySensor(coordinator, hub),
             GeoHomeGasPriceSensor(coordinator, hub),
@@ -67,7 +72,6 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
             GeoHomeGasZigbeeConnected(coordinator, hub),
             GeoHomeElectricityZigbeeConnected(coordinator, hub),
             GeoHomeHanConnected(coordinator, hub),
-
         ]
     )
 
@@ -89,6 +93,231 @@ class MyCoordinator(DataUpdateCoordinator):
         async with async_timeout.timeout(30):
             return await self.hub.get_device_data()
 
+class GeoHomeElectricityCreditRemaining(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Credit Remaining"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_Credit_Remaining"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityCreditRemaining
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return None
+
+class GeoHomeGasCreditRemaining(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Credit Remaining"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_Credit_Remaining"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasCreditRemaining
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return None   
+
+class GeoHomeElectricityEmergencyCreditBalance(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Emergency Credit Balance"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_Emergency_Credt_Balance"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.electricityEmergencyCreditBalance
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return None
+
+class GeoHomeGasEmergencyCreditBalance(CoordinatorEntity, SensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        super().__init__(coordinator)
+        self.hub = hub
+        self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_native_unit_of_measurement = "GBP"
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Emergency Credit Balance"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_Emergency_Credt_Balance"
+
+    @property
+    def native_value(self):
+        """Return the state of the sensor."""
+        return self.hub.gasEmergencyCreditBalance
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        return "mdi:currency-gbp"
+
+    @property
+    def last_reset(self):
+        return None    
+
+class GeoHomeElectricitySupplyStatus(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+        super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Electricity Supply Status"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_electricity_supply_status"
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        if self.hub.electricitySupplyStatus is not None:
+            if self.hub.electricitySupplyStatus=="SUPPLYON":
+                return STATE_ON
+            else:
+                return STATE_OFF
+        return None
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        if self.hub.electricitySupplyStatus is not None:
+            if self.hub.electricitySupplyStatus=="SUPPLYON":
+                return "mdi:flash"
+            else :
+                return "mdi:flash-outline"
+        return "mdi:flash-off-outline"   
+
+class GeoHomeGasSupplyStatus(CoordinatorEntity, BinarySensorEntity):
+    def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
+        self.hub = hub
+        self._attr_device_class = BinarySensorDeviceClass.CONNECTIVITY
+        super().__init__(coordinator)
+
+    @callback
+    def _handle_coordinator_update(self) -> None:
+        """Handle updated data from the coordinator."""
+        self.async_write_ha_state()
+
+    @property
+    def name(self):
+        """Return the name of the sensor."""
+        return "Gas Supply Status"
+
+    @property
+    def unique_id(self):
+        """Return the unique id of the sensor."""
+        return "geo_home_gas_supply_status"
+
+    @property
+    def is_on(self):
+        """Return the state of the sensor."""
+        if self.hub.gasSupplyStatus is not None:
+            if self.hub.gasSupplyStatus=="SUPPLYON":
+                return STATE_ON
+            else:
+                return STATE_OFF
+        return None
+
+    @property
+    def icon(self):
+        """Icon to use in the frontend, if any."""
+        if self.hub.gasSupplyStatus is not None:
+            if self.hub.gasSupplyStatus=="SUPPLYON":
+                return "mdi:fire"
+            else :
+                return "mdi:fire-off"
+        return "mdi:fire-alert" 
 
 class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
@@ -405,7 +634,7 @@ class GeoHomeElectricityPowerSensor(CoordinatorEntity, SensorEntity):
     @property
     def last_reset(self):
         return None
-        
+
 class GeoHomeGasCostPerHourSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
