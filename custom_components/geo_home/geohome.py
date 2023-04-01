@@ -35,6 +35,12 @@ class GeoHomeHub:
         self.password = password
         self.hass = hass
         self.accessToken = None
+        self.electricityCreditRemaining = None
+        self.gasCreditRemaining = None
+        self.electricityEmergencyCreditBalance = None
+        self.gasEmergencyCreditBalance = None
+        self.electricitySupplyStatus = None
+        self.gasSupplyStatus = None			
         self.electricityReading = None
         self.gasReading = None
         self.gaskWhReading = None
@@ -133,8 +139,32 @@ class GeoHomeHub:
                       if powerItem["valueAvailable"]:
                           self.gasPower = powerItem["watts"]
 
+            remainingArray = response_json.get("remainingCredit")
+
+            if remainingArray is not None:
+
+              for remainingItem in remainingArray:
+                  if remainingItem["commodityType"] == "ELECTRICITY":
+                      if remainingItem["valueAvailable"]:
+                      	  self.electricityCreditRemaining = round(remainingItem["creditBalance"]/100,2)
+                  if remainingItem["commodityType"] == "GAS_ENERGY":
+                      if remainingItem["valueAvailable"]:
+                          self.gasCreditRemaining = round(remainingItem["creditBalance"]/100,2)
+
+            EMCArray = response_json.get("emergencyCredit")
+
+            if EMCArray is not None:
+
+              for EMCItem in EMCArray:
+                  if EMCItem["commodityType"] == "ELECTRICITY":
+                      if EMCItem["valueAvailable"]:
+                      	  self.electricityEmergencyCreditBalance = round(EMCItem["emergencyCreditBalance"]/100,2)
+                  if EMCItem["commodityType"] == "GAS_ENERGY":
+                      if EMCItem["valueAvailable"]:
+                          self.gasEmergencyCreditBalance = round(EMCItem["emergencyCreditBalance"]/100,2)
+
             zigbeeStatus = response_json.get("zigbeeStatus")
-            
+
             if zigbeeStatus is not None:
 
               self.gasZigbeeStatus = zigbeeStatus["gasClusterStatus"]
@@ -165,6 +195,19 @@ class GeoHomeHub:
                               self.gaskWhReading = round(consumptionItem["totalConsumption"] * 11.3627 / 1000, 2)
                               self.gasReadingTime = consumptionItem["readingTime"]
 
+
+                supplyStatusArray = response_json.get("supplyStatusList")
+
+                if supplyStatusArray is not None:
+
+                  for supplyStatusItem in supplyStatusArray:
+                      if supplyStatusItem["commodityType"] == "ELECTRICITY":
+                              self.electricitySupplyStatus =  supplyStatusItem["supplyStatus"]
+                      if supplyStatusItem["commodityType"] == "GAS_ENERGY":
+                              self.gasSupplyStatus=  supplyStatusItem["supplyStatus"]
+
+
+
                 tarrifArray = response_json.get("activeTariffList")
 
                 if tarrifArray is not None:
@@ -176,7 +219,7 @@ class GeoHomeHub:
                       if tarrifItem["commodityType"] == "GAS_ENERGY":
                           if tarrifItem["valueAvailable"]:
                               self.gasPrice = tarrifItem["activeTariffPrice"] / 100
-                            
+
                 billToDateArray = response_json.get("billToDateList")
 
                 if billToDateArray is not None:
@@ -229,7 +272,7 @@ class GeoHomeHub:
                 if response.status_code == 200:
                     response_json = response.json()
                     standingChargeArray = response_json.get("standingChargeList")
-        
+
                     if standingChargeArray is not None:
                       for standingChargeItem in standingChargeArray:
                           if standingChargeItem["commodityType"] == "ELECTRICITY":
@@ -239,7 +282,7 @@ class GeoHomeHub:
                               if standingChargeItem["valueAvailable"]:
                                   self.gasStandingCharge = standingChargeItem["standingCharge"]/100
 
-                    
+
                 return True
             else:
                 self.accessToken = None
