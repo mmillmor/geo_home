@@ -75,8 +75,8 @@ class GeoHomeHub:
 
     def async_auth(self) -> bool:
         """Validate the username and password."""
-        username = config_entry.data.get("username")
-        password = config_entry.data.get("password")
+        username = self.config_entry.data.get("username")
+        password = self.config_entry.data.get("password")
 
         response = requests.post(
             BASE_URL + LOGIN_URL,
