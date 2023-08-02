@@ -32,6 +32,8 @@ class GeoHomeHub:
     def __init__(self, config_entry: ConfigEntry, hass: HomeAssistant) -> None:
         """Initialize the hub controller."""
         self.config_entry = config_entry
+        self.username = self.config_entry.data.get("username")
+        self.password = self.config_entry.data.get("password")
         self.hass = hass
         self.accessToken = None
         self.electricityCreditRemaining = None
@@ -75,12 +77,10 @@ class GeoHomeHub:
 
     def async_auth(self) -> bool:
         """Validate the username and password."""
-        username = self.config_entry.data.get("username")
-        password = self.config_entry.data.get("password")
 
         response = requests.post(
             BASE_URL + LOGIN_URL,
-            json={"identity": username, "password": password},
+            json={"identity": self.username, "password": self.password},
         )
         if response.status_code == 200:
             response_json = response.json()
@@ -93,8 +93,10 @@ class GeoHomeHub:
             _LOGGER.warning("GeoHome Auth API returned : " + str(response.status_code))
             return False
 
-    async def authenticate(self) -> bool:
+    async def authenticate(self,username,password) -> bool:
         """Validate the username, password and host asynchronously."""
+        self.username=username
+        self.password=password
         response = self.hass.async_add_executor_job(self.async_auth)
 
         return response
@@ -117,6 +119,8 @@ class GeoHomeHub:
 
     def async_get_device_data(self):
         if self.accessToken == None:
+            self.username = self.config_entry.data.get("username")
+            self.password = self.config_entry.data.get("password")
             self.async_auth()
         if self.deviceId == None:
             self.get_device_details()
