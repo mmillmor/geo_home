@@ -54,9 +54,9 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
-    hub = GeoHomeHub(data["username"], data["password"], hass)
+    hub = GeoHomeHub(None, hass)
 
-    if not await hub.authenticate():
+    if not await hub.authenticate(data["username"], data["password"]):
         raise InvalidAuth
 
     # If you cannot connect:
