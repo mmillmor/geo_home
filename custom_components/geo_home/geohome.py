@@ -29,9 +29,10 @@ _LOGGER = logging.getLogger(__name__)
 class GeoHomeHub:
     """GeoHome Hub controller."""
 
-    def __init__(self, config_entry: ConfigEntry, hass: HomeAssistant) -> None:
+    def __init__(self, username: str, password: str, hass: HomeAssistant) -> None:
         """Initialize the hub controller."""
-        self.config_entry = config_entry
+        self.username = username
+        self.password = password
         self.hass = hass
         self.accessToken = None
         self.electricityCreditRemaining = None
@@ -75,12 +76,10 @@ class GeoHomeHub:
 
     def async_auth(self) -> bool:
         """Validate the username and password."""
-        username = self.config_entry.data.get("username")
-        password = self.config_entry.data.get("password")
 
         response = requests.post(
             BASE_URL + LOGIN_URL,
-            json={"identity": username, "password": password},
+            json={"identity": self.username, "password": self.password},
         )
         if response.status_code == 200:
             response_json = response.json()
