@@ -98,6 +98,7 @@ class GeoHomeElectricityCreditRemaining(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
 
     @callback
@@ -134,6 +135,7 @@ class GeoHomeGasCreditRemaining(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
 
     @callback
@@ -163,13 +165,14 @@ class GeoHomeGasCreditRemaining(CoordinatorEntity, SensorEntity):
 
     @property
     def last_reset(self):
-        return None   
+        return None
 
 class GeoHomeElectricityEmergencyCreditBalance(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
 
     @callback
@@ -206,6 +209,7 @@ class GeoHomeGasEmergencyCreditBalance(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP"
 
     @callback
@@ -235,7 +239,7 @@ class GeoHomeGasEmergencyCreditBalance(CoordinatorEntity, SensorEntity):
 
     @property
     def last_reset(self):
-        return None    
+        return None
 
 class GeoHomeElectricitySupplyStatus(CoordinatorEntity, BinarySensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
@@ -276,7 +280,7 @@ class GeoHomeElectricitySupplyStatus(CoordinatorEntity, BinarySensorEntity):
                 return "mdi:flash"
             else :
                 return "mdi:flash-outline"
-        return "mdi:flash-off-outline"   
+        return "mdi:flash-off-outline"
 
 class GeoHomeGasSupplyStatus(CoordinatorEntity, BinarySensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
@@ -317,7 +321,7 @@ class GeoHomeGasSupplyStatus(CoordinatorEntity, BinarySensorEntity):
                 return "mdi:fire"
             else :
                 return "mdi:fire-off"
-        return "mdi:fire-alert" 
+        return "mdi:fire-alert"
 
 class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
@@ -398,6 +402,7 @@ class GeoHomeGasPriceSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @callback
@@ -430,6 +435,7 @@ class GeoHomeGasStandingChargeSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/day"
 
     @callback
@@ -500,6 +506,7 @@ class GeoHomeElectricityPriceSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/kWh"
 
     @callback
@@ -532,6 +539,7 @@ class GeoHomeElectricityStandingChargeSensor(CoordinatorEntity, SensorEntity):
         super().__init__(coordinator)
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/day"
 
     @callback
@@ -639,6 +647,7 @@ class GeoHomeGasCostPerHourSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/hour"
         super().__init__(coordinator)
 
@@ -678,6 +687,7 @@ class GeoHomeElectricityCostPerHourSensor(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.MONETARY
+        self._attr_state_class = SensorStateClass.TOTAL
         self._attr_native_unit_of_measurement = "GBP/hour"
         super().__init__(coordinator)
 

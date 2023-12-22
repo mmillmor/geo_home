@@ -1,9 +1,7 @@
 {
   "domain": "geo_home",
   "name": "Geo Home",
-  "codeowners": [
-    "@mmillmor"
-  ],
+  "codeowners": ["@mmillmor"],
   "config_flow": true,
   "dependencies": [],
   "documentation": "https://www.home-assistant.io/integrations/geo_home",
@@ -12,6 +10,6 @@
   "issue_tracker": "https://github.com/mmillmor/geo_home_hacs/issues",
   "requirements": [],
   "ssdp": [],
-  "version":"1.11.0",
+  "version": "1.11.1",
   "zeroconf": []
 }
