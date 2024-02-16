@@ -32,12 +32,17 @@ def options_schema(options: dict = None) -> dict:
             default=options.get("password", "password"),
             description="Geo Home web password",
         ): str,
+        vol.Required(
+            "polling_interval",
+            default=options.get("polling_interval", 10),  # Default polling interval of 10 seconds
+            description="Polling interval in seconds",
+        ): int,
     }
 
 
-def new_options(username: str, password: str) -> dict:
+def new_options(username: str, password: str, polling_interval: int) -> dict:
     """Create a standard options object."""
-    return {"username": username, "password": password}
+    return {"username": username, "password": password, "polling_interval": polling_interval}
 
 
 def options_data(user_input: dict) -> dict:
@@ -45,6 +50,7 @@ def options_data(user_input: dict) -> dict:
     return new_options(
         user_input.get("username", ""),
         user_input.get("password", ""),
+        user_input.get("polling_interval", 10),  # Default polling interval of 10 seconds
     )
 
 

@@ -31,9 +31,10 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     username = config_entry.data.get("username")
     password = config_entry.data.get("password")
+    polling_interval = config_entry.data.get("polling_interval")
     hub = GeoHomeHub(username, password, hass)
 
-    coordinator = MyCoordinator(hass, hub)
+    coordinator = MyCoordinator(hass, hub, polling_interval)
 
     await coordinator.async_config_entry_first_refresh()
 
@@ -77,7 +78,7 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
 class MyCoordinator(DataUpdateCoordinator):
 
-    def __init__(self, hass, hub):
+    def __init__(self, hass, hub, polling_interval):
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -85,7 +86,7 @@ class MyCoordinator(DataUpdateCoordinator):
             # Name of the data. For logging purposes.
             name="geo home sensor",
             # Polling interval. Will only be polled if there are subscribers.
-            update_interval=timedelta(seconds=120),
+            update_interval=timedelta(seconds=polling_interval),
         )
         self.hub = hub
 
