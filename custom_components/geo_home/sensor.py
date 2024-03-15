@@ -13,7 +13,7 @@ from homeassistant.components.binary_sensor import (
     BinarySensorEntity,
     BinarySensorDeviceClass
 )
-from homeassistant.const import ENERGY_KILO_WATT_HOUR, POWER_WATT, STATE_OFF, STATE_ON, VOLUME_CUBIC_METERS
+from homeassistant.const import STATE_OFF, STATE_ON, UnitOfEnergy, UnitOfPower, UnitOfVolume
 from homeassistant.core import callback
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -328,7 +328,7 @@ class GeoHomeGasSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -365,7 +365,7 @@ class GeoHomeGasM3Sensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.GAS
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-        self._attr_native_unit_of_measurement = VOLUME_CUBIC_METERS
+        self._attr_native_unit_of_measurement = UnitOfVolume.CUBIC_METERS
         super().__init__(coordinator)
 
     @callback
@@ -469,7 +469,7 @@ class GeoHomeElectricitySensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL_INCREASING
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -573,7 +573,7 @@ class GeoHomeGasPowerSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.POWER
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = POWER_WATT
+        self._attr_native_unit_of_measurement = UnitOfPower.WATT
         super().__init__(coordinator)
 
     @callback
@@ -611,7 +611,7 @@ class GeoHomeElectricityPowerSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.POWER
         self._attr_state_class = SensorStateClass.MEASUREMENT
-        self._attr_native_unit_of_measurement = POWER_WATT
+        self._attr_native_unit_of_measurement = UnitOfPower.WATT
         super().__init__(coordinator)
 
     @callback
@@ -1041,7 +1041,7 @@ class GeoHomeGaskWhTodaySensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -1079,7 +1079,7 @@ class GeoHomeGaskWhThisWeekSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -1119,7 +1119,7 @@ class GeoHomeGaskWhThisMonthSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -1156,7 +1156,7 @@ class GeoHomeElectricitykWhTodaySensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -1194,7 +1194,7 @@ class GeoHomeElectricitykWhThisWeekSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback
@@ -1234,7 +1234,7 @@ class GeoHomeElectricitykWhThisMonthSensor(CoordinatorEntity, SensorEntity):
         self.hub = hub
         self._attr_device_class = SensorDeviceClass.ENERGY
         self._attr_state_class = SensorStateClass.TOTAL
-        self._attr_native_unit_of_measurement = ENERGY_KILO_WATT_HOUR
+        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         super().__init__(coordinator)
 
     @callback

@@ -7,12 +7,6 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
-from homeassistant.components.climate.const import (
-    CURRENT_HVAC_HEAT,
-    CURRENT_HVAC_OFF,
-    HVAC_MODE_HEAT,
-    HVAC_MODE_OFF,
-)
 from homeassistant.core import HomeAssistant
 from .const import (
     BASE_URL,
@@ -40,7 +34,7 @@ class GeoHomeHub:
         self.electricityEmergencyCreditBalance = None
         self.gasEmergencyCreditBalance = None
         self.electricitySupplyStatus = None
-        self.gasSupplyStatus = None			
+        self.gasSupplyStatus = None
         self.electricityReading = None
         self.gasReading = None
         self.gaskWhReading = None
@@ -146,7 +140,7 @@ class GeoHomeHub:
               for remainingItem in remainingArray:
                   if remainingItem["commodityType"] == "ELECTRICITY":
                       if remainingItem["valueAvailable"]:
-                      	  self.electricityCreditRemaining = round(remainingItem["creditBalance"]/100,2)
+                          self.electricityCreditRemaining = round(remainingItem["creditBalance"]/100,2)
                   if remainingItem["commodityType"] == "GAS_ENERGY":
                       if remainingItem["valueAvailable"]:
                           self.gasCreditRemaining = round(remainingItem["creditBalance"]/100,2)
@@ -158,7 +152,7 @@ class GeoHomeHub:
               for EMCItem in EMCArray:
                   if EMCItem["commodityType"] == "ELECTRICITY":
                       if EMCItem["valueAvailable"]:
-                      	  self.electricityEmergencyCreditBalance = round(EMCItem["emergencyCreditBalance"]/100,2)
+                          self.electricityEmergencyCreditBalance = round(EMCItem["emergencyCreditBalance"]/100,2)
                   if EMCItem["commodityType"] == "GAS_ENERGY":
                       if EMCItem["valueAvailable"]:
                           self.gasEmergencyCreditBalance = round(EMCItem["emergencyCreditBalance"]/100,2)
