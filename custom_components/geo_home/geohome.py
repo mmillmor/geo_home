@@ -23,10 +23,11 @@ _LOGGER = logging.getLogger(__name__)
 class GeoHomeHub:
     """GeoHome Hub controller."""
 
-    def __init__(self, username: str, password: str, hass: HomeAssistant) -> None:
+    def __init__(self, username: str, password: str, system_name: str, hass: HomeAssistant) -> None:
         """Initialize the hub controller."""
         self.username = username
         self.password = password
+        self.system_name = system_name
         self.hass = hass
         self.accessToken = None
         self.electricityCreditRemaining = None
@@ -92,20 +93,41 @@ class GeoHomeHub:
 
         return response
 
-    def get_device_details(self):
+    async def async_get_device_details(self) -> bool:
+        response = self.hass.async_add_executor_job(self.get_device_details)
+        return response
+
+    def get_device_details(self) -> bool:
+
+        if self.accessToken == None:
+            _LOGGER.info("No access token, authenticating")
+            self.async_auth()
+
         response = requests.get(
             BASE_URL + DEVICE_DETAUILS_URL,
             headers={"Authorization": "Bearer " + str(self.accessToken)},
         )
+        systemFound=False
         if response.status_code == 200:
             response_json = response.json()
             systemDetails = response_json.get("systemDetails")
             for system in systemDetails:
+                if self.system_name:
+                    if system["name"]!=self.system_name:
+                        _LOGGER.info("Skipping system "+system["name"]+" as does not match configured system name "+self.system_name)
+                        continue
+                    _LOGGER.info("Found system "+system["systemId"]+" matching configured system name "+self.system_name)
+                else:
+                    _LOGGER.info("No system name configured, using first system found")
+
                 if len(system["devices"])>0:
+                    systemFound=True
                     self.deviceId = system["systemId"]
+                    _LOGGER.info("System ID found: " + self.deviceId)
                     break
         else:
             _LOGGER.warning("GeoHome Device Details API returned " + str(response.status_code))
+        return systemFound
 
 
     def async_get_device_data(self):

@@ -31,7 +31,8 @@ async def async_setup_entry(hass, config_entry, async_add_entities):
 
     username = config_entry.data.get("username")
     password = config_entry.data.get("password")
-    hub = GeoHomeHub(username, password, hass)
+    system_name = config_entry.data.get("system_name")
+    hub = GeoHomeHub(username, password, system_name, hass)
 
     coordinator = MyCoordinator(hass, hub)
 

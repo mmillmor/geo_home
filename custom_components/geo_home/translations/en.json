@@ -2,11 +2,12 @@
     "config": {
       "step": {
         "user": {
-          "title": "Setup get Home",
+          "title": "Setup Geo Home",
           "description": "Enter the username and password for geoHome.",
           "data": {
             "username": "Username",
-            "password": "Password"
+            "password": "Password",
+            "system_name": "System Name (optional)"
           }
         }
       },
@@ -22,11 +23,12 @@
     "options": {
       "step": {
         "init": {
-          "title": "Edit geo Home settings",
-          "description": "Enter the username and password for your geo Home.",
+          "title": "Edit Geo Home settings",
+          "description": "Enter the username and password for your Geo Home.",
           "data": {
             "username": "Username",
-            "password": "Password"
+            "password": "Password",
+            "system_name": "System Name (optional)"
           }
         }
       }

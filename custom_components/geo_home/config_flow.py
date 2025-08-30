@@ -32,12 +32,17 @@ def options_schema(options: dict = None) -> dict:
             default=options.get("password", "password"),
             description="Geo Home web password",
         ): str,
+        vol.Optional(
+            "system_name",
+            default=options.get("system_name", ""),
+            description="Geo Home system name",
+        ): str,
     }
 
 
-def new_options(username: str, password: str) -> dict:
+def new_options(username: str, password: str, system_name: str="") -> dict:
     """Create a standard options object."""
-    return {"username": username, "password": password}
+    return {"username": username, "password": password,"system_name":system_name}
 
 
 def options_data(user_input: dict) -> dict:
@@ -45,6 +50,7 @@ def options_data(user_input: dict) -> dict:
     return new_options(
         user_input.get("username", ""),
         user_input.get("password", ""),
+        user_input.get("system_name", ""),
     )
 
 
@@ -54,7 +60,7 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     Data has the keys from STEP_USER_DATA_SCHEMA with values provided by the user.
     """
 
-    hub = GeoHomeHub(data["username"], data["password"], hass)
+    hub = GeoHomeHub(data["username"], data["password"], data["system_name"], hass)
 
     if not await hub.authenticate():
         raise InvalidAuth
@@ -72,16 +78,15 @@ class OptionsFlowHandler(config_entries.OptionsFlow):
     """Options for the component."""
 
     def __init__(self, config_entry: ConfigEntry) -> None:
-        """Init object."""
+        """Initialize options flow."""
         self.config_entry = config_entry
+        self.options = dict(config_entry.options)
 
     async def async_step_init(self, user_input: dict[str, Any] | None = None):
         """Manage the options."""
         if user_input is not None:
-            return self.async_create_entry(
-                title="",
-                data=options_data(user_input),
-            )
+            options = self.config_entry.options | user_input
+            return self.async_create_entry(title="", data=options)
         return self.async_show_form(
             step_id="init",
             data_schema=vol.Schema(options_schema(self.config_entry.options)),
@@ -103,29 +108,55 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """Handle the initial step."""
-        if user_input is None:
-            return self.async_show_form(
-                step_id="user", data_schema=vol.Schema(options_schema())
-            )
-
         errors = {}
+        if user_input is not None:
 
-        try:
-            info = await validate_input(self.hass, user_input)
-        except CannotConnect:
-            errors["base"] = "cannot_connect"
-        except InvalidAuth:
-            errors["base"] = "invalid_auth"
-        except Exception:  # pylint: disable=broad-except
-            _LOGGER.exception("Unexpected exception")
-            errors["base"] = "unknown"
-        else:
-            return self.async_create_entry(title=info["title"], data=user_input)
+            try:
+                info = await validate_input(self.hass, user_input)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                #await self.async_set_unique_id(info.get("title"))
+                #self._abort_if_unique_id_configured()
+                return self.async_create_entry(title=info["title"], data=user_input)
 
         return self.async_show_form(
             step_id="user", data_schema=vol.Schema(options_schema()), errors=errors
         )
 
+    async def async_step_reconfigure(self, user_input: dict[str, Any] | None = None):
+        errors: dict[str, str] = {}
+        config_entry = self.hass.config_entries.async_get_entry(
+            self.context["entry_id"]
+        )
+
+        if user_input is not None:
+            try:
+                await validate_input(self.hass, user_input)
+            except CannotConnect:
+                errors["base"] = "cannot_connect"
+            except InvalidAuth:
+                errors["base"] = "invalid_auth"
+            except Exception:  # pylint: disable=broad-except
+                _LOGGER.exception("Unexpected exception")
+                errors["base"] = "unknown"
+            else:
+                return self.async_update_reload_and_abort(
+                    config_entry,
+                    unique_id=config_entry.unique_id,
+                    data={**config_entry.data, **user_input},
+                    reason="reconfigure_successful",
+                )
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(options_schema(self.config_entry.options)),
+            errors=errors,
+        )
 
 class CannotConnect(HomeAssistantError):
     """Error to indicate we cannot connect."""
