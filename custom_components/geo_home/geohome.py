@@ -89,12 +89,12 @@ class GeoHomeHub:
 
     async def authenticate(self) -> bool:
         """Validate the username, password and host asynchronously."""
-        response = self.hass.async_add_executor_job(self.async_auth)
+        response = await self.hass.async_add_executor_job(self.async_auth)
 
         return response
 
     async def async_get_device_details(self) -> bool:
-        response = self.hass.async_add_executor_job(self.get_device_details)
+        response = await self.hass.async_add_executor_job(self.get_device_details)
         return response
 
     def get_device_details(self) -> bool:

@@ -29,9 +29,10 @@ _LOGGER = logging.getLogger(__name__)
 
 async def async_setup_entry(hass, config_entry, async_add_entities):
 
-    username = config_entry.options.get("username", config_entry.data.get("username"))
-    password = config_entry.options.get("password", config_entry.data.get("password"))
-    system_name = config_entry.options.get("system_name", config_entry.data.get("system_name"))
+    username = config_entry.data.get("username")
+    _LOGGER.warning("Connecting with username : "+str(username))
+    password = config_entry.data.get("password")
+    system_name = config_entry.data.get("system_name")
     hub = GeoHomeHub(username, password, system_name, hass)
 
     coordinator = MyCoordinator(hass, hub)
@@ -92,7 +93,10 @@ class MyCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         async with async_timeout.timeout(30):
-            return await self.hub.get_device_data()
+            res = await self.hub.get_device_data()
+            if not res:
+                raise UpdateFailed("Failed to fetch data from GeoHome API")
+            return datetime.now()
 
 class GeoHomeElectricityCreditRemaining(CoordinatorEntity, SensorEntity):
     def __init__(self, coordinator: CoordinatorEntity, hub: GeoHomeHub):

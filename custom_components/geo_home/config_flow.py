@@ -74,37 +74,11 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> dict[str,
     return {"title": "Geo Home"}
 
 
-class OptionsFlowHandler(config_entries.OptionsFlow):
-    """Options for the component."""
-
-    def __init__(self, config_entry: ConfigEntry) -> None:
-        """Initialize options flow."""
-        self._entry = config_entry
-
-    async def async_step_init(self, user_input: dict[str, Any] | None = None):
-        """Manage the options."""
-        if user_input is not None:
-            options = self._entry.options | user_input
-            return self.async_create_entry(title="", data=options)
-
-        current_config = dict(self._entry.data)
-        current_config.update(self._entry.options)
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema(options_schema(current_config)),
-        )
-
 
 class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for Geo Home."""
 
     VERSION = 1
-
-    @staticmethod
-    @callback
-    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlowHandler:
-        """Get the options flow."""
-        return OptionsFlowHandler(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
